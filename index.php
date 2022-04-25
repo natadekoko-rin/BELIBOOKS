@@ -1,5 +1,21 @@
 <?php 
     include "db/connection.php";
+
+    $jumlahDataPerHalaman = 8;
+    $jumlahData = count(mysqli_fetch_array(mysqli_query($connection, "SELECT * FROM buku")));
+    $jumlahHalaman = ceil($jumlahData / $jumlahDataPerHalaman);
+
+    $halamanAktif =  (isset($_GET["halaman"])) ? $_GET["halaman"] : 1;
+
+    $awalData = $jumlahDataPerHalaman * ($halamanAktif-1); 
+
+
+    $sql = mysqli_query($connection, "SELECT * FROM buku ORDER BY harga DESC limit $awalData,$jumlahDataPerHalaman");
+    if (isset($_POST["cari"])){
+        require 'penjual/functions.php';
+        $sql = cari1($_POST["keyword"]);
+    }
+
 ?>
 
 
@@ -33,10 +49,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/custom.css">
 
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
+
 
 </head>
 
@@ -84,7 +97,7 @@
                         <ul>
                             <li><a href="penjual/login.php">Login/Daftar</a></li>
                             <li><a href="penjual/tambah.php"><i class="fas fa-camera"></i> Jual Buku</a></li>
-                            <li><a href="#"><i class="fas fa-question"></i> Help</a></li>
+                            <li><a href="#kontak"><i class="fas fa-question"></i> Help</a></li>
                         </ul>
                     </div>
                 </div>
@@ -102,7 +115,7 @@
                 <div class="navbar-header">
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbars-rs-food" aria-expanded="false" aria-label="Toggle navigation">
                     <i class="fa fa-bars"></i>
-                </button>
+                    </button>
                     <a class="navbar-brand" href="index.php"><img src="images/belibooks022.png" class="logo" alt=""></a>
                 </div>
                 <!-- End Header Navigation -->
@@ -110,77 +123,19 @@
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" id="navbar-menu">
                     <ul class="nav navbar-nav ml-auto" data-in="fadeInDown" data-out="fadeOutUp">
-                        <li class="nav-item active"><a class="nav-link" href="index.php">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="about.html">Tentang BeliBooks</a></li>
-                        <li class="dropdown megamenu-fw">
-                            <a href="#" class="nav-link dropdown-toggle arrow" data-toggle="dropdown">Produk</a>
-                            <ul class="dropdown-menu megamenu-content" role="menu">
-                                <li>
-                                    <div class="row">
-                                        <div class="col-menu col-md-3">
-                                            <h6 class="kategori">Informatika</h6>
-                                            <div class="content">
-                                                <ul class="menu-col">
-                                                    <li><a href="shop.html">Modul</a></li>
-                                                    <li><a href="shop.html">Diktat</a></li>
-                                                    <li><a href="shop.html">Buku</a></li>
-                                                    <li><a href="shop.html">............</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <!-- end col-3 -->
-                                        <div class="col-menu col-md-3">
-                                            <h6 class="kategori">Kimia</h6>
-                                            <div class="content">
-                                                <ul class="menu-col">
-                                                    <li><a href="shop.html">Modul</a></li>
-                                                    <li><a href="shop.html">Buku Ajar</a></li>
-                                                    <li><a href="shop.html">Buku</a></li>
-                                                    <li><a href="shop.html">........</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <!-- end col-3 -->
-                                        <div class="col-menu col-md-3">
-                                            <h6 class="kategori">Biologi</h6>
-                                            <div class="content">
-                                                <ul class="menu-col">
-                                                    <li><a href="shop.html">Top Wear</a></li>
-                                                    <li><a href="shop.html">Party wear</a></li>
-                                                    <li><a href="shop.html">Bottom Wear</a></li>
-                                                    <li><a href="shop.html">Indian Wear</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <div class="col-menu col-md-3">
-                                            <h6 class="title">Accessories</h6>
-                                            <div class="content">
-                                                <ul class="menu-col">
-                                                    <li><a href="shop.html">Bags</a></li>
-                                                    <li><a href="shop.html">Sunglasses</a></li>
-                                                    <li><a href="shop.html">Fragrances</a></li>
-                                                    <li><a href="shop.html">Wallets</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <!-- end col-3 -->
-                                    </div>
-                                    <!-- end row -->
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link dropdown-toggle arrow" data-toggle="dropdown">SHOP</a>
+                        <li class="nav-item active"><a class="nav-link" href="index.php">Home <i class="fas fa-home"></i></a></li>
+                        <li class="Aboutbelibooks"><a class="nav-link" href="#belibooks">Tentang BeliBooks</a></li>
+                       <li class="dropdown">
+                            <a class="nav-link dropdown-toggle" data-toggle="dropdown">Buku <i class="fas fa-book"></i></a>
                             <ul class="dropdown-menu">
-                                <li><a href="cart.html">Cart</a></li>
-                                <li><a href="checkout.html">Checkout</a></li>
-                                <li><a href="my-account.html">My Account</a></li>
-                                <li><a href="wishlist.html">Wishlist</a></li>
-                                <li><a href="shop-detail.html">Shop Detail</a></li>
+                                <li><a href="#if">Informatika</a></li>
+                                <li><a href="#bio">Biologi</a></li>
+                                <li><a href="#bio">Kimia</a></li>
+                                <li><a href="#math">Matematika</a></li>
+                                <li><a href="#stat">Statistika</a></li>
+                                <li><a href="#fis">Fisika</a></li>
                             </ul>
                         </li>
-                        <li class="nav-item"><a class="nav-link" href="#service.html">Our Service</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#contact-us.html">Contact Us</a></li>
                     </ul>
                 </div>
                 <!-- /.navbar-collapse -->
@@ -188,43 +143,16 @@
                 <!-- Start Atribute Navigation -->
                 <div class="attr-nav">
                     <ul>
-                        <li class="search"><a href="#"><i class="fa fa-search"></i></a></li>
-                        <li class="side-menu"><a href="#">
-						<i class="fa fa-shopping-bag"></i>
-                            <span class="badge">3</span>
-					</a></li>
+                        <form action="" method="post">
+                            <input type="text" name="keyword" size="30" autofocus="" placeholder="Cari..." autocomplete="off">
+                            <!-- <button type="submit" name="cari">Cari</button> -->
+                            <button type="submit" name="cari"><a href="#"><i class="fa fa-search"></i></a></button>
+                        </form>
+                        <!-- <li class="search"><a href="#"><i class="fa fa-search"></i></a></li> -->
                     </ul>
                 </div>
                 <!-- End Atribute Navigation -->
             </div>
-            <!-- Start Side Menu -->
-            <div class="side">
-                <a href="#" class="close-side"><i class="fa fa-times"></i></a>
-                <li class="cart-box">
-                    <ul class="cart-list">
-                        <li>
-                            <a href="#" class="photo"><img src="images/img-pro-01.jpg" class="cart-thumb" alt="" /></a>
-                            <h6><a href="#">Delica omtantur </a></h6>
-                            <p>1x - <span class="price">$80.00</span></p>
-                        </li>
-                        <li>
-                            <a href="#" class="photo"><img src="images/img-pro-02.jpg" class="cart-thumb" alt="" /></a>
-                            <h6><a href="#">Omnes ocurreret</a></h6>
-                            <p>1x - <span class="price">$60.00</span></p>
-                        </li>
-                        <li>
-                            <a href="#" class="photo"><img src="images/img-pro-03.jpg" class="cart-thumb" alt="" /></a>
-                            <h6><a href="#">Agam facilisis</a></h6>
-                            <p>1x - <span class="price">$40.00</span></p>
-                        </li>
-                        <li class="total">
-                            <a href="#" class="btn btn-default hvr-hover btn-cart">VIEW CART</a>
-                            <span class="float-right"><strong>Total</strong>: $180.00</span>
-                        </li>
-                    </ul>
-                </li>
-            </div>
-            <!-- End Side Menu -->
         </nav>
         <!-- End Navigation -->
     </header>
@@ -245,37 +173,62 @@
     <!-- Start Slider -->
     <div id="slides-shop" class="cover-slides">
         <ul class="slides-container">
+            
             <li class="text-left">
-                <img src="images/banner-01.jpg" alt="">
+                <img src="images/banner_1.jpg" alt="">
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12">
-                            <h1 class="m-b-20"><strong>Welcome To <br> Thewayshop</strong></h1>
-                            <p class="m-b-40">See how your users experience your website in realtime or view <br> trends to see any changes in performance over time.</p>
+                            <h1 class="m-b-20"><strong>Welcome To <br> Change your life now</strong></h1>
+                            <p class="m-b-40"> <br> A room without books is like a body without a soul. Life without books is like a dark room without light.</p>
                             <p><a class="btn hvr-hover" href="#">Shop New</a></p>
                         </div>
                     </div>
                 </div>
             </li>
             <li class="text-center">
-                <img src="images/banner-02.jpg" alt="">
+                <img src="images/banner_2.jpg" alt="">
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12">
-                            <h1 class="m-b-20"><strong>Welcome To <br> Thewayshop</strong></h1>
-                            <p class="m-b-40">See how your users experience your website in realtime or view <br> trends to see any changes in performance over time.</p>
+                            <h1 class="m-b-20"><strong>Welcome To <br> BELIBOOKS</strong></h1>
+                            <p class="m-b-40">GACHA <br> I cannot live without books because books are a mirror of the soul.</p>
                             <p><a class="btn hvr-hover" href="#">Shop New</a></p>
                         </div>
                     </div>
                 </div>
             </li>
             <li class="text-right">
-                <img src="images/banner-03.jpg" alt="">
+                <img src="images/banner_3.jpg" alt="">
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12">
-                            <h1 class="m-b-20"><strong>Welcome To <br> Thewayshop</strong></h1>
-                            <p class="m-b-40">See how your users experience your website in realtime or view <br> trends to see any changes in performance over time.</p>
+                            <h1 class="m-b-20"><strong>Welcome To <br> BELIBOOKS</strong></h1>
+                            <p class="m-b-40">Open your book now <br> A classic book is a book that never finishes saying what needs to be said.</p>
+                            <p><a class="btn hvr-hover" href="#">Shop New</a></p>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="text-right">
+                <img src="images/banner_4.jpg" alt="">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h1 class="m-b-20"><strong>Welcome To <br> BELIBOOKS</strong></h1>
+                            <p class="m-b-40">Think before you speak. <br> Read before you think.</p>
+                            <p><a class="btn hvr-hover" href="#">Shop New</a></p>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="text-right">
+                <img src="images/banner_5.jpg" alt="">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h1 class="m-b-20"><strong>Welcome To <br> BELIBOOKS</strong></h1>
+                            <p class="m-b-40">There are worse crimes than burning books.<br> Salah satunya adalah dengan tidak membacanya.</p>
                             <p><a class="btn hvr-hover" href="#">Shop New</a></p>
                         </div>
                     </div>
@@ -289,53 +242,14 @@
     </div>
     <!-- End Slider -->
 
-    <!-- Start Categories  -->
-    <div class="categories-shop">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="images/t-shirts-img.jpg" alt="" />
-                        <a class="btn hvr-hover" href="#">T-shirts</a>
-                    </div>
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="images/shirt-img.jpg" alt="" />
-                        <a class="btn hvr-hover" href="#">Shirt</a>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="images/wallet-img.jpg" alt="" />
-                        <a class="btn hvr-hover" href="#">Wallet</a>
-                    </div>
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="images/women-bag-img.jpg" alt="" />
-                        <a class="btn hvr-hover" href="#">Bags</a>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="images/shoes-img.jpg" alt="" />
-                        <a class="btn hvr-hover" href="#">Shoes</a>
-                    </div>
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="images/women-shoes-img.jpg" alt="" />
-                        <a class="btn hvr-hover" href="#">Women Shoes</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- End Categories -->
-
     <!-- Start Products  -->
     <div class="products-box">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="title-all text-center">
-                        <h1>Featured Products</h1>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet lacus enim.</p>
+                        <h1>Buku</h1>
+                        <p>Segala jenis buku tersedia</p>
                     </div>
                 </div>
             </div>
@@ -344,7 +258,7 @@
                     <div class="special-menu text-center">
                         <div class="button-group filter-button-group">
                             <button class="active" data-filter="*">All</button>
-                            <button data-filter=".top-featured">Top featured</button>
+                            <button data-filter=".top-featured">Top Book</button>
                             <button data-filter=".best-seller">Best seller</button>
                         </div>
                     </div>
@@ -352,261 +266,200 @@
             </div>
 
             <div class="row special-list">
-                <div class="col-lg-3 col-md-6 special-grid best-seller">
-                    <div class="products-single fix">
-                        <div class="box-img-hover">
-                            <div class="type-lb">
-                                <p class="sale">Sale</p>
-                            </div>
-                            <img src="images/img-pro-01.jpg" class="img-fluid" alt="Image">
-                            <div class="mask-icon">
-                                <ul>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="View"><i class="fas fa-eye"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Add to Wishlist"><i class="far fa-heart"></i></a></li>
-                                </ul>
-                                <a class="cart" href="#">Add to Cart</a>
-                            </div>
-                        </div>
-                        <div class="why-text">
-                            <h4>Lorem ipsum dolor sit amet</h4>
-                            <h5> $7.79</h5>
-                        </div>
-                    </div>
-                </div>
+                <?php               
+                    while($data = mysqli_fetch_array($sql)){
+                ?>
 
-                <div class="col-lg-3 col-md-6 special-grid top-featured">
+                <div class="col-lg-3 col-md-6 special-grid best-seller" style="height: 450px">
                     <div class="products-single fix">
                         <div class="box-img-hover">
                             <div class="type-lb">
-                                <p class="new">New</p>
+                                <p class="sale">Belibooks</p>
                             </div>
-                            <img src="images/img-pro-02.jpg" class="img-fluid" alt="Image">
+                            <img src="images/<?php echo $data['gambar'] ?>" class="img-fluid" alt="Image" style="height: 300px">
                             <div class="mask-icon">
                                 <ul>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="View"><i class="fas fa-eye"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Add to Wishlist"><i class="far fa-heart"></i></a></li>
+                                    <li><a href="detail.php?id_buku=<?=$data['id_buku']?>" data-toggle="tooltip" data-placement="right" title="View"><i class="fas fa-eye"></i></a></li>
                                 </ul>
-                                <a class="cart" href="#">Add to Cart</a>
-                            </div>
+                            </div> 
                         </div>
                         <div class="why-text">
-                            <h4>Lorem ipsum dolor sit amet</h4>
-                            <h5> $9.79</h5>
+                            <h4><?php echo $data['judul'] ?></h4>
+                            <h5> Rp <?php echo $data['harga'] ?></h5>
                         </div>
                     </div>
                 </div>
+                <?php 
+                    }
+                 ?>
 
-                <div class="col-lg-3 col-md-6 special-grid top-featured">
-                    <div class="products-single fix">
-                        <div class="box-img-hover">
-                            <div class="type-lb">
-                                <p class="sale">Sale</p>
-                            </div>
-                            <img src="images/img-pro-03.jpg" class="img-fluid" alt="Image">
-                            <div class="mask-icon">
-                                <ul>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="View"><i class="fas fa-eye"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Add to Wishlist"><i class="far fa-heart"></i></a></li>
-                                </ul>
-                                <a class="cart" href="#">Add to Cart</a>
-                            </div>
-                        </div>
-                        <div class="why-text">
-                            <h4>Lorem ipsum dolor sit amet</h4>
-                            <h5> $10.79</h5>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-6 special-grid best-seller">
-                    <div class="products-single fix">
-                        <div class="box-img-hover">
-                            <div class="type-lb">
-                                <p class="sale">Sale</p>
-                            </div>
-                            <img src="images/img-pro-04.jpg" class="img-fluid" alt="Image">
-                            <div class="mask-icon">
-                                <ul>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="View"><i class="fas fa-eye"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Add to Wishlist"><i class="far fa-heart"></i></a></li>
-                                </ul>
-                                <a class="cart" href="#">Add to Cart</a>
-                            </div>
-                        </div>
-                        <div class="why-text">
-                            <h4>Lorem ipsum dolor sit amet</h4>
-                            <h5> $15.79</h5>
-                        </div>
-                    </div>
-                </div>
             </div>
+
+        <!-- navigasi -->
+         <div class="row justify-content-center">
+            <nav aria-label="..." class="text-center">
+                <ul class="pagination">
+                    <?php if ($halamanAktif>1) : ?>
+                        <li class="page-item">
+                          <a class="page-link" href="?halaman=<?= $halamanAktif-1 ?>">Previous</a>
+                        </li>
+                    <?php endif ?>
+                
+                    <?php for($i=1; $i<=$jumlahHalaman; $i++) : ?>
+                        <?php if ($i == $halamanAktif) : ?>
+                            <li class="page-item active" aria-current="page">
+                              <span class="page-link"><?=$i ?><span class="sr-only">(current)</span></span>
+                            </li>
+                        <?php else : ?>
+                            <li class="page-item"><a class="page-link" href="?halaman=<?=$i ?>"><?=$i ?></a></li>
+                        <?php  endif?>
+                    <?php endfor; ?>
+
+                    <?php if ($halamanAktif < $jumlahHalaman) : ?>
+                        <li class="page-item">
+                          <a class="page-link" href="?halaman=<?= $halamanAktif+1 ?>">Next</a>
+                        </li>
+                    <?php endif ?>
+                </ul>
+            </nav>
+         </div>
+       
+         
+          
         </div>
     </div>
-    <!-- End Products  -->
-
-    <!-- Start Blog  -->
-    <div class="latest-blog">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="title-all text-center">
-                        <h1>latest blog</h1>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet lacus enim.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 col-lg-4 col-xl-4">
-                    <div class="blog-box">
-                        <div class="blog-img">
-                            <img class="img-fluid" src="images/blog-img.jpg" alt="" />
-                        </div>
-                        <div class="blog-content">
-                            <div class="title-blog">
-                                <h3>Fusce in augue non nisi fringilla</h3>
-                                <p>Nulla ut urna egestas, porta libero id, suscipit orci. Quisque in lectus sit amet urna dignissim feugiat. Mauris molestie egestas pharetra. Ut finibus cursus nunc sed mollis. Praesent laoreet lacinia elit id lobortis.</p>
-                            </div>
-                            <ul class="option-blog">
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Likes"><i class="far fa-heart"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Views"><i class="fas fa-eye"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Comments"><i class="far fa-comments"></i></a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4 col-xl-4">
-                    <div class="blog-box">
-                        <div class="blog-img">
-                            <img class="img-fluid" src="images/blog-img-01.jpg" alt="" />
-                        </div>
-                        <div class="blog-content">
-                            <div class="title-blog">
-                                <h3>Fusce in augue non nisi fringilla</h3>
-                                <p>Nulla ut urna egestas, porta libero id, suscipit orci. Quisque in lectus sit amet urna dignissim feugiat. Mauris molestie egestas pharetra. Ut finibus cursus nunc sed mollis. Praesent laoreet lacinia elit id lobortis.</p>
-                            </div>
-                            <ul class="option-blog">
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Likes"><i class="far fa-heart"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Views"><i class="fas fa-eye"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Comments"><i class="far fa-comments"></i></a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4 col-xl-4">
-                    <div class="blog-box">
-                        <div class="blog-img">
-                            <img class="img-fluid" src="images/blog-img-02.jpg" alt="" />
-                        </div>
-                        <div class="blog-content">
-                            <div class="title-blog">
-                                <h3>Fusce in augue non nisi fringilla</h3>
-                                <p>Nulla ut urna egestas, porta libero id, suscipit orci. Quisque in lectus sit amet urna dignissim feugiat. Mauris molestie egestas pharetra. Ut finibus cursus nunc sed mollis. Praesent laoreet lacinia elit id lobortis.</p>
-                            </div>
-                            <ul class="option-blog">
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Likes"><i class="far fa-heart"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Views"><i class="fas fa-eye"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Comments"><i class="far fa-comments"></i></a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- End Blog  -->
-
-
+   
     <!-- Start Instagram Feed  -->
+    
     <div class="instagram-box">
+        <p id="if"><a class="btn hvr-hover" href="index2.php?kategori=informatika">INFORMATIKA</a></p>
         <div class="main-instagram owl-carousel owl-theme">
+            <?php
+             $sql1 = mysqli_query($connection, "SELECT * FROM buku where  kategori like '%informatika%'");
+                foreach ($sql1 as $key) { 
+            ?>
+            
             <div class="item">
                 <div class="ins-inner-box">
-                    <img src="images/instagram-img-01.jpg" alt="" />
+                    <img src="images/<?= $key['gambar'] ?>" alt="" style="height: 200px"/>
                     <div class="hov-in">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="detail.php?id_buku=<?=$key['id_buku'] ?>"><i class="fas fa-eye"></i></a>
                     </div>
                 </div>
             </div>
-            <div class="item">
-                <div class="ins-inner-box">
-                    <img src="images/instagram-img-02.jpg" alt="" />
-                    <div class="hov-in">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="ins-inner-box">
-                    <img src="images/instagram-img-03.jpg" alt="" />
-                    <div class="hov-in">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="ins-inner-box">
-                    <img src="images/instagram-img-04.jpg" alt="" />
-                    <div class="hov-in">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="ins-inner-box">
-                    <img src="images/instagram-img-05.jpg" alt="" />
-                    <div class="hov-in">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="ins-inner-box">
-                    <img src="images/instagram-img-06.jpg" alt="" />
-                    <div class="hov-in">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="ins-inner-box">
-                    <img src="images/instagram-img-07.jpg" alt="" />
-                    <div class="hov-in">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="ins-inner-box">
-                    <img src="images/instagram-img-08.jpg" alt="" />
-                    <div class="hov-in">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="ins-inner-box">
-                    <img src="images/instagram-img-09.jpg" alt="" />
-                    <div class="hov-in">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="ins-inner-box">
-                    <img src="images/instagram-img-05.jpg" alt="" />
-                    <div class="hov-in">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
+            <?php 
+                } 
+            ?>
+            
         </div>
     </div>
     <!-- End Instagram Feed  -->
 
+    <div class="instagram-box">
+        <p id="bio"><a class="btn hvr-hover" href="index2.php?kategori=biologi">BIOLOGI</a></p>
+        <div class="main-instagram owl-carousel owl-theme">
+            <?php
+                $sql2 = mysqli_query($connection, "SELECT * FROM buku where  kategori like '%biologi%'");
+                foreach ($sql2 as $key) { 
+            ?>
+            
+            <div class="item">
+                <div class="ins-inner-box">
+                    <img src="images/<?= $key['gambar'] ?>" alt="" style="height: 200px"/>
+                    <div class="hov-in">
+                        <a href="detail.php?id_buku=<?=$key['id_buku'] ?>"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+            </div>
+            <?php 
+                } 
+            ?>
+        </div>
+    </div>
+
+    <div class="instagram-box">
+        <p id="kimia"><a class="btn hvr-hover" href="index2.php?kategori=kimia">KIMIA</a></p>
+        <div class="main-instagram owl-carousel owl-theme">
+            <?php
+                $sql3 = mysqli_query($connection, "SELECT * FROM buku where  kategori like '%kimia%'");
+                foreach ($sql3 as $key) { 
+            ?>
+            <div class="item">
+                <div class="ins-inner-box">
+                    <img src="images/<?= $key['gambar'] ?>" alt="" style="height: 200px" />
+                    <div class="hov-in">
+                        <a href="detail.php?id_buku=<?=$key['id_buku'] ?>"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+            </div>
+            <?php 
+                } 
+            ?>
+        </div>
+    </div>
+
+    <div class="instagram-box">
+        <p id="math"><a class="btn hvr-hover" href="index2.php?kategori=matematika">MATEMATIKA</a></p>
+        <div class="main-instagram owl-carousel owl-theme">
+            <?php
+                $sql4 = mysqli_query($connection, "SELECT * FROM buku where  kategori like '%matematika%'");
+                foreach ($sql4 as $key) { 
+            ?>
+            <div class="item">
+                <div class="ins-inner-box">
+                    <img src="images/<?= $key['gambar'] ?>" alt="" style="height: 200px" />
+                    <div class="hov-in">
+                        <a href="detail.php?id_buku=<?=$key['id_buku'] ?>"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+            </div>
+            <?php 
+                } 
+            ?>
+        </div>
+    </div>
+
+    <div class="instagram-box">
+        <p id="stat"><a class="btn hvr-hover" href="index2.php?kategori=statistika">STATISTIKA</a></p>
+        <div class="main-instagram owl-carousel owl-theme">
+            <?php
+                $sql4 = mysqli_query($connection, "SELECT * FROM buku where  kategori like '%statistika%'");
+                foreach ($sql4 as $key) { 
+            ?>
+            <div class="item">
+                <div class="ins-inner-box">
+                    <img src="images/<?= $key['gambar'] ?>" alt="" style="height: 200px"/>
+                    <div class="hov-in">
+                        <a href="detail.php?id_buku=<?=$key['id_buku'] ?>"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+            </div>
+            <?php 
+                } 
+            ?>
+        </div>
+    </div>
+
+    <div class="instagram-box">
+        <p id="fis"><a class="btn hvr-hover" href="index2.php?kategori=fisika">FISIKA</a></p>
+        <div class="main-instagram owl-carousel owl-theme">
+            <?php
+                $sql5 = mysqli_query($connection, "SELECT * FROM buku where  kategori like '%fisika%'");
+                foreach ($sql5 as $key) { 
+            ?>
+            <div class="item">
+                <div class="ins-inner-box">
+                    <img src="images/<?= $key['gambar'] ?>" alt="" style="height: 200px" />
+                    <div class="hov-in">
+                        <a href="detail.php?id_buku=<?=$key['id_buku'] ?>"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+            </div>
+            <?php 
+                } 
+            ?>
+        </div>
+    </div>
 
     <!-- Start Footer  -->
     <footer>
@@ -615,9 +468,9 @@
                 <div class="row">
                     <div class="col-lg-4 col-md-12 col-sm-12">
                         <div class="footer-widget">
-                            <h4>About ThewayShop</h4>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                </p>
+                            <h4 id="belibooks">About BeliBooks</h4>
+                            <p>Aplikasi BeliBooks adalah sebuah aplikasi yang dapat digunakan sebagai sarana jual beli buku antara penjual dan pembeli. Buku yang dijual dalam aplikasi ini merupakan buku-buku ilmiah yang digunakan untuk referensi mata kuliah ataupun modul perkuliahan. Kondisi buku yang dijual berupa buku baru maupun buku bekas yang masih layak pakai.
+                            </p>
                             <ul>
                                 <li><a href="#"><i class="fab fa-facebook" aria-hidden="true"></i></a></li>
                                 <li><a href="#"><i class="fab fa-twitter" aria-hidden="true"></i></a></li>
@@ -633,27 +486,38 @@
                         <div class="footer-link">
                             <h4>Information</h4>
                             <ul>
-                                <li><a href="#">About Us</a></li>
-                                <li><a href="#">Customer Service</a></li>
-                                <li><a href="#">Our Sitemap</a></li>
-                                <li><a href="#">Terms &amp; Conditions</a></li>
-                                <li><a href="#">Privacy Policy</a></li>
-                                <li><a href="#">Delivery Information</a></li>
+                                <li>
+                                    <p><a href="#"><i class="fas fa-address-card"></i> Tentang BeliBooks</a></p>
+                                </li>
+                                <li>
+                                    <p><a href="#"><i class="fas fa-clipboard-list"></i> &nbsp; Terms &amp; Conditions</a></p>
+                                </li>
+                                <li>
+                                    <p><a href="#"><i class="fas fa-user-shield"></i> Privacy Policy</a></p>
+                                </li>
+                                <li>
+                                    <p><a href="#"><i class="fas fa-truck"></i> Delivery Information</a></p>
+                                </li>
                             </ul>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-12 col-sm-12">
                         <div class="footer-link-contact">
-                            <h4>Contact Us</h4>
+                            <h4 id="kontak">Contact Us</h4>
                             <ul>
                                 <li>
-                                    <p><i class="fas fa-map-marker-alt"></i>Address: Michael I. Days 3756 <br>Preston Street Wichita,<br> KS 67213 </p>
+                                    <p><a href="https://www.google.co.id/maps/place/Makam+timoho/@-7.0605915,110.4443699,20.59z/data=!4m5!3m4!1s0x2e708faf40e3bdd1:0x13d5aeb5a3f116fb!8m2!3d-7.0606277!4d110.4443691">
+                                        <i class="fas fa-map-marker-alt">
+                                        </i>Address: Fakultas Sains dan Matematika, 
+                                        <br>Universitas Diponegoro, Semarang
+                                    </p>
+                                </li>
+                                
+                                <li>
+                                    <p><i class="fas fa-phone-square"></i>Phone: <a href=" https://api.whatsapp.com/send?phone=6282225907462"><span class="c-icon"><i class="fa fa-whatsapp" aria-hidden="true"></i></span> <span class="c-info">+62822 2590 7462</span></a></p>
                                 </li>
                                 <li>
-                                    <p><i class="fas fa-phone-square"></i>Phone: <a href="tel:+1-888705770">+1-888 705 770</a></p>
-                                </li>
-                                <li>
-                                    <p><i class="fas fa-envelope"></i>Email: <a href="mailto:contactinfo@gmail.com">contactinfo@gmail.com</a></p>
+                                    <p><i class="fas fa-envelope"></i>Email: <a href="mailto:belibooks@gmail.com">belibooks@gmail.com</a></p>
                                 </li>
                             </ul>
                         </div>
@@ -666,12 +530,11 @@
 
     <!-- Start copyright  -->
     <div class="footer-copyright">
-        <p class="footer-company">All Rights Reserved. &copy; 2018 <a href="#">ThewayShop</a> Design By :
-            <a href="https://html.design/">html design</a></p>
+        <p class="footer-company">All Rights Reserved. &copy; 2019 <a href="index.php">BeliBooks</a>
     </div>
     <!-- End copyright  -->
 
-    <a href="#" id="back-to-top" title="Back to top" style="display: none;">&uarr;</a>
+    <a href="index.php" id="back-to-top" title="Back to top" style="display: none;">&uarr;</a>
 
     <!-- ALL JS FILES -->
     <script src="js/jquery-3.2.1.min.js"></script>

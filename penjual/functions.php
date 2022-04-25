@@ -15,6 +15,8 @@ function query ($query) {
 
 function tambah ($post) {
 	global $conn;
+	$id_penjual = $post['id_penjual'];
+	$kategori = htmlspecialchars($post["kategori"]);
 	$judul = htmlspecialchars($post["judul"]);
 	$pengarang = htmlspecialchars($post["pengarang"]);
 	$penerbit = htmlspecialchars($post["penerbit"]);
@@ -29,7 +31,7 @@ function tambah ($post) {
 	}
 
 
-	$query = "INSERT INTO `buku`(`id_buku`, `judul`, `pengarang`, `penerbit`, `tahun_terbit`, `harga`, `stok`, `gambar`, `id_penjual`) VALUES   ('','$judul','$pengarang','$penerbit',$tahun_terbit,$harga,$stok,'$gambar',2)";
+	$query = "INSERT INTO `buku`(`id_buku`, `judul`, `pengarang`, `penerbit`, `tahun_terbit`, `harga`, `stok`,`kategori`, `gambar`, `id_penjual`) VALUES   ('','$judul','$pengarang','$penerbit',$tahun_terbit,$harga,$stok,'$kategori','$gambar', $id_penjual)";
 	mysqli_query($conn, $query);
 	return 	mysqli_affected_rows ($conn);
 
@@ -64,7 +66,7 @@ function upload(){
 	}
 
 	// cek ukuran file
-	if ($ukuran > 500000) {
+	if ($ukuran > 2000000) {
 		echo "<script>
 						alert('gambar terlalu besar');
 					  </script>";
@@ -76,65 +78,116 @@ function upload(){
 	$namafilebaru = uniqid();
 	$namafilebaru .= '.';
 	$namafilebaru .= $extgambar;
-	move_uploaded_file($tmpname, 'img/'.$namafilebaru);
+	move_uploaded_file($tmpname, '../images/'.$namafilebaru);
 	
 	return $namafilebaru;
 }
 
 
+
 function hapus($id){
 	global $conn;
-	mysqli_query($conn, "DELETE FROM buku WHERE id = $id");
+	mysqli_query($conn, "DELETE FROM buku WHERE id_buku=$id");
 	return mysqli_affected_rows($conn);
 }
 
 
-// function ubah($post) {
+function ubah($post) {
+	global $conn;
+	$id = $post["id"];
+	$kategori = htmlspecialchars($post["kategori"]);
+	$judul = htmlspecialchars($post["judul"]);
+	$pengarang = htmlspecialchars($post["pengarang"]);
+	$penerbit = htmlspecialchars($post["penerbit"]);
+	$tahun_terbit = htmlspecialchars($post["tahun_terbit"]);
+	$harga = htmlspecialchars($post["harga"]);
+	$stok = htmlspecialchars($post["stok"]);
+	$gambarlama = htmlspecialchars($post["gambarlama"]);
 
-// 	global $conn;
-// 	$id = $post["id"];
-// 	$judul = htmlspecialchars($post["judul"]);
-// 	$pengarang = htmlspecialchars($post["pengarang"]);
-// 	$penerbit = htmlspecialchars($post["penerbit"]);
-// 	$tahun_terbit = htmlspecialchars($post["tahun_terbit"]);
-// 	$harga = htmlspecialchars($post["harga"]);
-// 	$stok = htmlspecialchars($post["stok"]);
-// 	$gambarlama = htmlspecialchars($post["gambarlama"]);
-
-// 	//cek user pilih gambar baru atau tidak
-// 	if ($_FILES['gambar']['error'] === 4) {
-// 		$gambar = $gambarlama;
-// 	} else {
-// 		$gambar = upload();
-// 	}
-
-
-// 	$query = "UPDATE buku SET 
-// 				judul = '$judul',
-// 				pengarang = '$pengarang',
-// 				penerbit = '$penerbit',
-// 				tahun_terbit = '$tahun_terbit',
-// 				harga = '$harga',
-// 				stok = '$stok'
-// 			WHERE id = $id
-// 			";
+	//cek user pilih gambar baru atau tidak
+	if ($_FILES['gambar']['error'] === 4) {
+		$gambar = $gambarlama;
+	} else {
+		$gambar = upload();
+	}
 
 
-// 	mysqli_query($conn, $query);
-// 	return 	mysqli_affected_rows ($conn);
+	$query = "UPDATE buku SET 
+				kategori = '$kategori',
+				judul = '$judul',
+				pengarang = '$pengarang',
+				penerbit = '$penerbit',
+				tahun_terbit = $tahun_terbit,
+				harga = $harga,
+				stok = $stok,
+				gambar = '$gambar'
+			WHERE id_buku = $id
+			";
 
-// }
 
-function cari($keyword) {
+	mysqli_query($conn, $query);
+	return 	mysqli_affected_rows ($conn);
+
+}
+
+function cari1($keyword) {
+	global $conn;
+		$key = htmlspecialchars($keyword);
+	$jumlahDataPerHalaman = 8;
+    $jumlahData = count(mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM buku WHERE
+				judul like '%$key%' or 
+				pengarang like '%$key%' or
+				penerbit like '%$key%' or
+				tahun_terbit like '%$key%' or
+				harga like '%$key%' or
+				kategori like '%$key%'")));
+
+    $jumlahHalaman = ceil($jumlahData / $jumlahDataPerHalaman);
+
+    $halamanAktif =  (isset($_GET["halaman"])) ? $_GET["halaman"] : 1;
+
+    $awalData = $jumlahDataPerHalaman * ($halamanAktif-1); 
+
 	$query = "SELECT * FROM buku WHERE
-				judul like '%$keyword%' or 
-				pengarang like '%$keyword%' or
-				penerbit like '%$keyword%'
+				judul like '%$key%' or 
+				pengarang like '%$key%' or
+				penerbit like '%$key%' or
+				tahun_terbit like '%$key%' or
+				harga like '%$key%' or
+				kategori like '%$key%' limit $awalData, $jumlahDataPerHalaman
+			";
+
+	return mysqli_query($conn, $query);
+}
+
+function cari3($keyword, $kategori) {
+	global $conn;
+	$key = htmlspecialchars($keyword);
+	$query = "SELECT * FROM buku WHERE
+				(judul like '%$key%' or 
+				pengarang like '%$key%' or
+				penerbit like '%$key%' or
+				tahun_terbit like '%$key%' or
+				harga like '%$key%') and kategori='$kategori'
+			";
+
+	return mysqli_query($conn, $query);
+}
+
+
+function cari2($keyword,$id_penjual) {
+	$key = htmlspecialchars($keyword);
+	$query = "SELECT * FROM buku WHERE
+				(judul like '%$key%' or 
+				pengarang like '%$key%' or
+				penerbit like '%$key%' or
+				tahun_terbit like '%$key%' or
+				harga like '%$key%' or
+				kategori like '%$key%') and id_penjual=$id_penjual
 			";
 
 	return query($query);
 }
-
 
 function registrasi($data) {
 	global $conn;
@@ -171,6 +224,16 @@ function registrasi($data) {
 
 }
 
+
+function rand_string($length) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
 
 
 

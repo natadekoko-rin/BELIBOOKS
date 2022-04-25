@@ -10,22 +10,11 @@ require 'functions.php';
 
 $id = $_GET["id"];
 
-if (hapus($id) > 0) {
-	echo "
-		<script>
-			alert('Data berhasil dihapus!');
-			document.location.href = 'index.php';
-		</script>
-	";
-} else {
-	echo "
-		<script>
-			alert('data gagal dihapus!');
-			document.location.href = 'index.php';
-		</script>
-	";
-}
+mysqli_query($conn, "DELETE FROM buku WHERE id_buku=$id");
 
+if (mysqli_affected_rows($conn) > 0) {
+	header("Location:index.php");
+}
 
 
  ?>

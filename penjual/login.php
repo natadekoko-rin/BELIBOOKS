@@ -7,15 +7,15 @@
         <meta name="keywords" content="expand, form, css3, jquery, animate, width, height, adapt, unobtrusive javascript"/>
 		<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon"/>
         <link rel="stylesheet" type="text/css" href="../css/style2.css" />
-		<script src="../js/cufon-yui.js" type="text/javascript"></script>
-		<script src="../js/ChunkFive_400.font.js" type="text/javascript"></script>
-		<script type="text/javascript">
+		<!-- <script src="../js/cufon-yui.js" type="text/javascript"></script> -->
+		<!-- <script src="../js/ChunkFive_400.font.js" type="text/javascript"></script> -->
+<!-- 		<script type="text/javascript">
 			Cufon.replace('h1',{ textShadow: '1px 1px #fff'});
 			Cufon.replace('h2',{ textShadow: '1px 1px #fff'});
 			Cufon.replace('h3',{ textShadow: '1px 1px #000'});
 			Cufon.replace('.back');
 		</script>
-		<script>
+ -->		<script>
 			function validateForm(){
 				var x = document.forms["formLogin"]["fusername"].value;
 				var y = document.forms["formLogin"]["fpassword"].value;
@@ -52,43 +52,123 @@
 	if(isset($_POST['submit'])){
 		$username=$_POST['fusername'];
 		$password=$_POST['fpassword'];
-		$query = mysqli_query($con," SELECT * FROM penjual ");
-		
-		while ($row = mysqli_fetch_array($query)){
-			if($username==$row['username'] && $password==$row['password'])
-				{
-					$_SESSION['customerid'] = $row['customerid'];
-					$_SESSION['login'] = true;
-					header("location:index.php");
-				}
-				else if($username!=$row['username'])
-				{
-					echo "<script>alert('Username salah');</script>";
-				}
-				else if($password!=$row['password'])
-				{
-					echo "<script>alert('Password salah');</script>";
-				}
+
+		$result = mysqli_query($con, "SELECT * FROM penjual WHERE username = '$username' and status=1");
+		$row = mysqli_fetch_assoc($result);
+		// cek username
+		if (mysqli_num_rows($result) > 0) {
+
+			//cek password
+			if ($password == $row["password"]) {
+				// set session
+				$_SESSION['id_penjual'] = $row['id_penjual'];
+				$_SESSION['login'] = true;
+				header("location:index.php");
+				exit;
+			}else{
+				echo "<script>alert('Password salah');</script>";
+			} 
+		} elseif ($row['status']==0) {
+			echo "<script>alert('Akun anda belum aktif!, cek email anda untuk aktivasi.');</script>";
+			// return false;
 		}
 	}
+	
 	// ===============
+	require 'PHPMailer/PHPMailerAutoload.php';
+	require 'functions.php';
 	if (isset($_POST['submit2'])) {
-				$username = $_POST['fusername'];
-				$email = $_POST['femail'];
-				$nama = $_POST['fname'];
-				$no_hp = $_POST['fno_hp'];
-				$alamat = $_POST['falamat'];
-				$password = $_POST['fpassword'];
-				$status = "1";
+				$username = htmlspecialchars($_POST['fusername']);
+				$email = htmlspecialchars($_POST['femail']);
+				$nama = htmlspecialchars($_POST['fname']);
+				$no_hp = htmlspecialchars($_POST['fno_hp']);
+				$alamat = htmlspecialchars($_POST['falamat']);
+				$password = htmlspecialchars($_POST['fpassword']);
+				$password2 = htmlspecialchars($_POST['fpassword2']);
+				$status = "0";
 
-				$query2 = "INSERT INTO penjual (id_penjual,username,email,nama,no_hp,alamat,password,status) VALUES ('','$username','$email', '$nama', '$no_hp', '$alamat', '$password', '$status')";
+
+				$result = mysqli_query($con, "SELECT username FROM penjual WHERE username='$username' and status=1");
+				$cekEmail = mysqli_query($con, "SELECT email FROM penjual WHERE email='$email'");
+				if (mysqli_fetch_assoc($result)) {
+					echo "<script>
+							alert('username sudah terdaftar');
+						</script>";
+					return false;
+				}
+
+				if (mysqli_fetch_assoc($cekEmail)) {
+					echo "<script>
+							alert('email sudah terdaftar');
+						</script>";
+					return false;
+				}
+
+				// cek konfirmasi password
+				if ($password !== $password2 ) {
+					echo "<script>
+							alert('password tidak sesuai');
+						</script>";
+					return false;
+				}
+
+				if (!mysqli_fetch_assoc($result) && !mysqli_fetch_assoc($cekEmail) && ($password == $password2)) {
+
+					$query2 = "INSERT INTO penjual (id_penjual,username,email,nama,no_hp,alamat,password,status) VALUES ('','$username','$email', '$nama', '$no_hp', '$alamat', '$password', '$status')";
+
+
 
 					if ($con->query($query2) === TRUE) {
-						echo "<script>alert('Berhasil Ditambahkan');</script>";
+						$mail = new PHPMailer;
+
+						// Konfigurasi SMTP
+						$mail->isSMTP();
+						$mail->Host = 'ssl://smtp.googlemail.com';
+						$mail->SMTPAuth = true;
+						$mail->Username = 'haniframadandhani@gmail.com';
+						$mail->Password = '09aku???';
+						$mail->SMTPSecure = 'tls';
+						$mail->Port = 465;
+
+						$kode = rand_string(32);
+
+						$mail->setFrom('haniframadandhani@gmail.com', 'Belibooks');
+						$mail->addReplyTo('noReply', 'Belibooks');
+
+						// Menambahkan penerima
+						$mail->addAddress($email);
+
+						// Subjek email
+						$mail->Subject = 'Aktivasi Akun';
+
+						// Mengatur format email ke HTML
+						$mail->isHTML(true);
+
+						// Konten/isi email
+						$mailContent = "<h1>Akun anda perlu diaktifkan</h1>
+						    <p>Klik link di bawah ini untuk mengaktifkan akun anda.</p>
+						    <a href='http://localhost/ppl/belibooks-project/verifikasi.php?kd=$kode&email=$email'><button>Aktivasi akun</button></a>";
+
+						$mail->Body = $mailContent;
+						$query3 = "INSERT INTO aktivasi VALUES ('$email', '$kode')";
+						$con->query($query3);
+						// Kirim email
+						if(!$mail->send()){
+						    echo 'link aktivasi tidak terkirim.';
+						    echo 'Mailer Error: ' . $mail->ErrorInfo;
+						}else{
+						    echo "
+							<script>
+								alert('Registrasi Berhasil! cek email anda untuk aktivasi akun');
+								</script>
+							";
+						}
 					} else {
 						echo "<script>alert('Gagal');</script>";
 					}
+				}
 			}
+
 
 	?>
     </head>
@@ -101,7 +181,7 @@
 						<div class="column">
 							<div>
 								<label>Username:</label>
-								<input type="text" name="fusername" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Full Name (maximum 50 characters)" pattern="[a-zA-Z ]{3,50}" title="Only letters and white space allowed" required>
+								<input type="text" name="fusername" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Full Name (maximum 50 characters)" value="<?php if(isset($_POST['fusername']) ) echo $_POST['fusername'] ?>" minlength="3" title="Only letters and white space allowed" required>
 								<!-- <span class="error">This is an error</span> -->
 							</div>
 							<div>
@@ -111,19 +191,19 @@
 							</div>
 							<div>
 								<label>Nama:</label>
-								<input type="text" name="fname" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Full Name (maximum 50 characters)" pattern="[a-zA-Z ]{3,50}" title="Only letters and white space allowed" required>
+								<input type="text" name="fname" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Full Name (maximum 50 characters)" minlength="3" title="Only letters and white space allowed" required>
 								<!-- <span class="error">This is an error</span> -->
 							</div>
 						</div>
 						<div class="column">
 							<div>
 								<label>Alamat:</label>
-								<input type="text" name="falamat" rows="5" cols="40" class="form-control form-control-user" placeholder="Address" pattern="[a-zA-Z0-9_.,:-]{3,200}" title="Please fill your address with the right format" required></input>
+								<input type="text" name="falamat" rows="5" cols="40" class="form-control form-control-user" placeholder="Address" minlength="3" title="Please fill your address with the right format" required></input>
 								<!-- <span class="error">This is an error</span> -->
 							</div>
 							<div>
 								<label>No HP:</label>
-								<input type="text" name="fno_hp" class="form-control form-control-user" id="exampleInputEmail" placeholder="Nomor HP" pattern="*[0-9]" title="Please fill your phone number with the right format" required>
+								<input type="text" name="fno_hp" class="form-control form-control-user" id="exampleInputEmail" placeholder="6281234567890" pattern="*[0-9]" title="Please fill your phone number with the right format" required>
 								<!-- <span class="error">This is an error</span> -->
 							</div>
 							<div>
@@ -133,16 +213,12 @@
 							</div>
 							<div>
 								<label>Konfirmasi Password:</label>
-								<input type="password" name="fpassword" id="password" class="form-control form-control-user" placeholder="Password" pattern="(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Please fill your password with must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
+								<input type="password" name="fpassword2" id="password" class="form-control form-control-user" placeholder="Password" pattern="(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Please fill your password with must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
 								<span class="error">This is an error</span>
 							</div>
 						</div>
 						<button type="submit" name="submit2">Register</button>
 						<div class="bottom">
-							<div class="remember">
-								<input type="checkbox" />
-								<span>Send me updates</span>
-							</div>
 							<!-- <input type="submit" value="Register" /> -->
 							<a href="login.php" rel="login" class="linkform">You have an account already? Log in here</a>
 							<div class="clear"></div>
@@ -153,17 +229,19 @@
 						<h3>Login</h3>
 						<div>
 							<label>Username:</label>
-							<input type="text" name="fusername" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Username">
+							<input type="text" name="fusername" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Username">
 							<!-- <span class="error">This is an error</span> -->
 						</div>
 						<div>
 							<label>Password: 
 								<!-- <a href="forgot_password.html" rel="forgot_password" class="forgot linkform">Forgot your password?</a> -->
 							</label>
-							<input type="password" name="fpassword" id="password1" class="form-control form-control-user" placeholder="Password">
+							<input type="password" name="fpassword" id="password1" placeholder="Password">
 							<!-- <span class="error">This is an error</span> -->
 						</div>
-						<button type="submit" name="submit">Login</button>
+						<div>
+							<button type="submit" name="submit" class="button">Login</button>
+						</div>
 						<!-- <input type="submit" name="submit" value="Login" > -->
 						<div class="bottom">
 							<!-- <div class="remember"><input type="checkbox" /><span>Keep me logged in</span></div> -->

@@ -834,6 +834,7 @@
      overflow: hidden;
      position: relative;
      margin-bottom: 30px;
+     box-sizing: border-box;
 }
  .products-single .box-img-hover{
      overflow: hidden;
